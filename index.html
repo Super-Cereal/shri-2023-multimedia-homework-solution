@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta
+        name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+    />
+    <title>Stories</title>
+
+    <link rel="stylesheet" href="http://localhost:3000/index.css" />
+</head>
+
+<body>
+<div class="container">
+    <div class="progress">
+        <!-- script inserted progress-bars -->
+    </div>
+    <div class="stories" onclick="togglePlay()">
+        <!-- script inserted stories -->
+    </div>
+    <div class="controls">
+        <button onclick="prev()">Предыдущий</button>
+        <button onclick="next()">Следующий</button>
+
+        <div>
+            <label for="brightness-input">Яркость</label>
+            <input
+                type="range"
+                id="brightness-input"
+                min="0"
+                max="2"
+                step="0.01"
+            />
+            <label for="brightness-input" id="brightness-input-value">1</label>
+        </div>
+        <div>
+            <label for="contrast-input">Контраст</label>
+            <input type="range" id="contrast-input" min="0" max="2" step="0.01" />
+            <label for="contrast-input" id="contrast-input-value">1</label>
+        </div>
+    </div>
+</div>
+
+<script>
+    const videosSrc = [
+        'http://localhost:3000/vids/1.mp4',
+        'http://localhost:3000/vids/2.mp4',
+        'http://localhost:3000/vids/3.mp4',
+        'http://localhost:3000/vids/4.mp4',
+        'http://localhost:3000/vids/5.mp4',
+    ];
+
+    const PROGRESS_UPDATE_INTERVAL = 50;
+    const SLIDE_TRANSITION = 500;
+    const MAX_SLIDER_WIDTH = 400;
+
+    const progressContainer = document.querySelector('.progress');
+
+    const slider = document.querySelector('.stories');
+    slider.style.transition = `transform ${SLIDE_TRANSITION}ms`;
+    const slideWidth = Math.min(
+        document.documentElement.clientWidth,
+        MAX_SLIDER_WIDTH,
+    );
+
+    let prevVideo;
+    for (let idx = 0; idx < videosSrc.length; idx++) {
+        const video = initStory(idx, videosSrc[idx]);
+
+        prevVideo?.addEventListener('ended', () => {
+            next();
+
+            setTimeout(() => video.play(), SLIDE_TRANSITION);
+        });
+
+        prevVideo = video;
+    }
+
+    let currentIndex = 0;
+
+    function getStory(idx) {
+        return document.getElementById(`video-${idx}`);
+    }
+
+    function getProgressBar(idx) {
+        return document.getElementById(`progress-${idx}`);
+    }
+
+    function updateProgressBar(idx, value) {
+        if (value === undefined) {
+            const story = getStory(idx);
+            value = story.currentTime / story.duration;
+        }
+
+        getProgressBar(idx).style.transform = `scaleX(${value}`;
+    }
+
+    function initStory(id, src) {
+        slider.insertAdjacentHTML(
+            'beforeend',
+            `<div class="stories__story">
+                        <video id="video-${id}" class="stories__video" src="${src}"></video>
+                    </div>`,
+        );
+
+        progressContainer.insertAdjacentHTML(
+            'beforeend',
+            `<span class="progress__bar">
+                        <span id="progress-${id}" class="progress__bar-value"></span>
+                    </span>`,
+        );
+
+        return getStory(id);
+    }
+
+    function togglePlay(idx) {
+        const currentStory = getStory(idx || currentIndex);
+
+        currentStory.paused ? currentStory.play() : currentStory.pause();
+    }
+
+    function start(idx) {
+        getStory(idx || currentIndex).play();
+        getProgressBar();
+    }
+
+    function pause(idx) {
+        getStory(idx || currentIndex).pause();
+    }
+
+    function toZero(idx) {
+        const elemIdx = idx || currentIndex;
+        pause(elemIdx);
+
+        getProgressBar(elemIdx);
+
+        setTimeout(() => (getStory(elemIdx).currentTime = 0), SLIDE_TRANSITION);
+    }
+
+    function prev() {
+        if (currentIndex > 0) {
+            toZero();
+
+            currentIndex -= 1;
+            updateProgressBar(currentIndex + 1, 0);
+            move();
+            start();
+        }
+    }
+
+    function next() {
+        if (currentIndex < videosSrc.length - 1) {
+            toZero();
+
+            currentIndex += 1;
+            updateProgressBar(currentIndex - 1, 1);
+            move();
+            start();
+        }
+    }
+
+    function move() {
+        slider.style.transform = `translateX(-${currentIndex * slideWidth}px)`;
+    }
+
+    function currentStoryWatcher() {
+        updateProgressBar(currentIndex);
+
+        requestAnimationFrame(currentStoryWatcher);
+    }
+    requestAnimationFrame(currentStoryWatcher);
+
+    const brightnessInput = document.getElementById('brightness-input');
+    const contrastInput = document.getElementById('contrast-input');
+    const contrastLabel = document.getElementById('contrast-input-value');
+    const brightnessLabel = document.getElementById('brightness-input-value');
+
+    function update() {
+        const brightness = brightnessInput.value;
+        const contrast = contrastInput.value;
+        slider.style.filter = `brightness(${brightness}) contrast(${contrast})`;
+        brightnessLabel.innerText = brightness;
+        contrastLabel.innerText = contrast;
+    }
+
+    [brightnessInput, contrastInput].forEach((input) => {
+        // change срабатывает на "отпускание селектора"
+        // input.addEventListener('change', update);
+
+        // а 'input' на любое изменение
+        input.addEventListener('input', update);
+    });
+</script>
+</body>
+</html>

@@ -39,16 +39,127 @@ body {
     max-width: inherit;
 }
 
+/* обертка всех интерактивных элементов */
 .controls {
     position: absolute;
 
     display: flex;
     flex-direction: column;
+    align-items: center;
 
-    top: 24px;
-    right: 0;
+    bottom: 24px;
+    right: 50%;
+    left: 50%;
 }
 
+/* перетаскивалки котраста и яркости */
+.controls__inputs {
+    display: flex;
+
+    margin-top: 16px;
+}
+
+.input {
+    margin-left: 8px;
+}
+
+.input:first-child {
+    margin-left: 0;
+}
+
+.input__label {
+    min-width: 100px;
+    display: inline-block;
+
+    color: black;
+    background: #efefef;
+
+    padding: 4px;
+    border-radius: 4px;
+}
+
+.input__range {
+    -webkit-appearance: none;
+    background: #ddd;
+    height: 5px;
+    border-radius: 5px;
+    outline: none;
+    width: 100%;
+    margin: 15px 0;
+    cursor: pointer;
+}
+
+.input__range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    background: #fff;
+    border-radius: 50%;
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+    cursor: pointer;
+    /*margin-top: -8px;*/
+}
+
+.range-value {
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 14px;
+    color: #555;
+}
+
+/* кнопки вперед-назад */
+.controls__buttons {
+    display: flex;
+}
+
+.button {
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition-duration: 0.4s;
+
+    width: 150px;
+    margin-left: 8px;
+
+    display: flex;
+    align-items: center;
+}
+
+.button:hover {
+    background-color: #3e8e41; /* Задаем цвет фона при наведении на кнопку */
+}
+
+.button:first-child {
+    margin-left: 0;
+}
+
+.button_prev {
+    padding-left: 8px;
+}
+
+.button_next {
+    padding-right: 8px;
+}
+
+.button svg {
+    width: 24px;
+    height: 24px;
+
+    fill: white;
+}
+
+.button_next svg {
+    transform: rotate(180deg);
+}
+
+/* прогресс-бар */
 .progress {
     position: absolute;
 
@@ -87,10 +198,42 @@ body {
     background: #ffba00;
 }
 
-label {
-    min-width: 100px;
-    display: inline-block;
+/* экран паузы */
+.stop-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
 
-    color: black;
-    background: #efefef;
+    z-index: 5;
+}
+
+.stop-screen__button {
+    position: absolute;
+    fill: #cfcfcf;
+
+    width: 150px;
+    height: 150px;
+
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    cursor: pointer;
+}
+
+.stop-screen__plate {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    background: #222222;
+    opacity: 0.5;
+}
+
+.stop-screen_playing {
+    display: none;
 }
